@@ -11,7 +11,7 @@ n <- readline(prompt="Enter board size: ")
 N <- as.integer(n)
 N
 
-k <- readline(prompt="Enter win line size: ")
+k <- readline(prompt="Enter winning line size: ")
 K <- as.integer(k)
 K
 
@@ -33,7 +33,7 @@ move <- function(x,y,character){
   
   hStart <- y
   hEnd <- y
-  #poziom
+  #horizontal
   for(i in 1:K){
     if(isIndexValid(x, y - i) && board[x,y-i] == character){
       hStart <- (y-i)
@@ -51,12 +51,12 @@ move <- function(x,y,character){
     }
   }
   if(hEnd - hStart + 1 >= K){
-    cat("Znaleziono poziom¹ wygran¹ od ")
+    cat("Horizontal winning line from ")
     cat("[")
     cat(x)
     cat(", ")
     cat(hStart)
-    cat("] do [")
+    cat("] to [")
     cat(x)
     cat(", ")
     cat(hEnd)
@@ -66,7 +66,7 @@ move <- function(x,y,character){
   
   vStart <- x
   vEnd <- x
-  #pion
+  #vertical
   for(i in 1:K){
     if(isIndexValid(x-i, y) && board[x-i,y] == character){
       vStart <- (x-i)
@@ -84,12 +84,12 @@ move <- function(x,y,character){
     }
   }
   if(vEnd - vStart + 1 >= K){
-    cat("Znaleziono pionow¹ wygran¹ od ")
+    cat("Vertical winning line from ")
     cat("[")
     cat(vStart)
     cat(", ")
     cat(y)
-    cat("] do [")
+    cat("] to [")
     cat(vEnd)
     cat(", ")
     cat(y)
@@ -99,7 +99,7 @@ move <- function(x,y,character){
   
   dStart <- 0
   dEnd <- 0
-  #diag
+  #diagonal
   for(i in 1:K){
     if(isIndexValid(x-i, y-i) && board[x-i,y-i] == character){
       dStart <- i
@@ -117,12 +117,12 @@ move <- function(x,y,character){
     }
   }
   if(dEnd + dStart + 1 >= K){
-    cat("Znaleziono diagonaln¹ wygran¹ od ")
+    cat("Diagonal winning line from ")
     cat("[")
     cat(x - dStart)
     cat(", ")
     cat(y - dStart)
-    cat("] do [")
+    cat("] to [")
     cat(x + dEnd)
     cat(", ")
     cat(y + dEnd)
@@ -132,7 +132,7 @@ move <- function(x,y,character){
   
   adStart <- 0
   adEnd <- 0
-  #anty diag
+  #anti-diagonal
   for(i in 1:K){
     if(isIndexValid(x+i, y-i) && board[x+i,y-i] == character){
       adStart <- i
@@ -150,12 +150,12 @@ move <- function(x,y,character){
     }
   }
   if(adEnd + adStart + 1 >= K){
-    cat("Znaleziono diagonaln¹ wygran¹ od ")
+    cat("Anti-diagonal winning line from ")
     cat("[")
     cat(x + adStart)
     cat(", ")
     cat(y - adStart)
-    cat("] do [")
+    cat("] to [")
     cat(x - adEnd)
     cat(", ")
     cat(y + adEnd)
@@ -163,6 +163,9 @@ move <- function(x,y,character){
     return(TRUE)
   }
   
+  if(moveCounter == 0){
+    cat("DRAW!\n")
+  }
   
 }
 
