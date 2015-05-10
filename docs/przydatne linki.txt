@@ -1,0 +1,9 @@
+link do czyjegoœ repozytorium: https://bitbucket.org/robrtj/coevolutionary-tic-tac-toe-learning/overview
+
+fitness coevolution: http://www.academia.edu/4601803/Fitnessless_Coevolution
+
+ewolucyjne podejœcie: http://people.ece.cornell.edu/land/courses/ece5760/FinalProjects/f2009/nic4_sck76/nic4_sck76/
+
+genetic evolution: http://www.genetic-programming.org/sp2003/Hochmuth.pdf
+
+coevolution: http://www.ijcte.org/papers/799-T098.pdf
