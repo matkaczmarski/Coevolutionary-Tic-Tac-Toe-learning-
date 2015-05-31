@@ -1,0 +1,17 @@
+{
+    "contents" : "\nblank <- '-'\n#lockBinding(\"b\", globalenv())\no <- 'o'\n#lockBinding(\"o\", globalenv())\nx <- 'x'\n#lockBinding(\"x\", globalenv())\n\n\nn <- readline(prompt=\"Enter board size: \")\nN <- as.integer(n)\nN\n\nk <- readline(prompt=\"Enter winning line size: \")\nK <- as.integer(k)\nK\n\nboard <- matrix('-', N, N)\nmoveCounter <- N*N\n\nisIndexValid <- function(x,y){\n  return(x > 0 && y > 0 && x <= N && y <= N)\n}\n\n\nmove <- function(x,y,character){\n  if(board[x,y] != blank){\n    return (FALSE)\n  }\n  \n  board[x,y] <<- character\n  moveCounter <<- moveCounter - 1\n  \n  hStart <- y\n  hEnd <- y\n  #horizontal\n  for(i in 1:K){\n    if(isIndexValid(x, y - i) && board[x,y-i] == character){\n      hStart <- (y-i)\n    }\n    else{\n      break\n    }\n  }\n  for(i in 1:K){\n    if(isIndexValid(x, y + i) && board[x,y+i] == character){\n      hEnd <- (y+i)\n    }\n    else{\n      break\n    }\n  }\n  if(hEnd - hStart + 1 >= K){\n    cat(\"Horizontal winning line from \")\n    cat(\"[\")\n    cat(x)\n    cat(\", \")\n    cat(hStart)\n    cat(\"] to [\")\n    cat(x)\n    cat(\", \")\n    cat(hEnd)\n    cat(\"]\\n\")\n    return(TRUE)\n  }\n  \n  vStart <- x\n  vEnd <- x\n  #vertical\n  for(i in 1:K){\n    if(isIndexValid(x-i, y) && board[x-i,y] == character){\n      vStart <- (x-i)\n    }\n    else{\n      break\n    }\n  }\n  for(i in 1:K){\n    if(isIndexValid(x+i, y) && board[x+i,y] == character){\n      vEnd <- (x+i)\n    }\n    else{\n      break\n    }\n  }\n  if(vEnd - vStart + 1 >= K){\n    cat(\"Vertical winning line from \")\n    cat(\"[\")\n    cat(vStart)\n    cat(\", \")\n    cat(y)\n    cat(\"] to [\")\n    cat(vEnd)\n    cat(\", \")\n    cat(y)\n    cat(\"]\\n\")\n    return(TRUE)\n  }\n  \n  dStart <- 0\n  dEnd <- 0\n  #diagonal\n  for(i in 1:K){\n    if(isIndexValid(x-i, y-i) && board[x-i,y-i] == character){\n      dStart <- i\n    }\n    else{\n      break\n    }\n  }\n  for(i in 1:K){\n    if(isIndexValid(x+i, y+i) && board[x+i,y+i] == character){\n      dEnd <- i\n    }\n    else{\n      break\n    }\n  }\n  if(dEnd + dStart + 1 >= K){\n    cat(\"Diagonal winning line from \")\n    cat(\"[\")\n    cat(x - dStart)\n    cat(\", \")\n    cat(y - dStart)\n    cat(\"] to [\")\n    cat(x + dEnd)\n    cat(\", \")\n    cat(y + dEnd)\n    cat(\"]\\n\")\n    return(TRUE)\n  }\n  \n  adStart <- 0\n  adEnd <- 0\n  #anti-diagonal\n  for(i in 1:K){\n    if(isIndexValid(x+i, y-i) && board[x+i,y-i] == character){\n      adStart <- i\n    }\n    else{\n      break\n    }\n  }\n  for(i in 1:K){\n    if(isIndexValid(x-i, y+i) && board[x-i,y+i] == character){\n      adEnd <- i\n    }\n    else{\n      break\n    }\n  }\n  if(adEnd + adStart + 1 >= K){\n    cat(\"Anti-diagonal winning line from \")\n    cat(\"[\")\n    cat(x + adStart)\n    cat(\", \")\n    cat(y - adStart)\n    cat(\"] to [\")\n    cat(x - adEnd)\n    cat(\", \")\n    cat(y + adEnd)\n    cat(\"]\\n\")\n    return(TRUE)\n  }\n  \n  if(moveCounter == 0){\n    cat(\"DRAW!\\n\")\n  }\n  \n}\n\n\n",
+    "created" : 1433068949932.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3545155636",
+    "id" : "43C174B7",
+    "lastKnownWriteTime" : 1433068984,
+    "path" : "C:/Users/Mateusz/Desktop/repozytoria/Coevolutionary-Tic-Tac-Toe-learning-/src/CoevolutionaryTicTacToe/CheckForWinLoseDraw.R",
+    "project_path" : "CheckForWinLoseDraw.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
