@@ -1,0 +1,17 @@
+{
+    "contents" : "#Funkcje konwertujące plansze do liczb i liczby do plansz\n\n\n\nboardToId <- function(board){\n  id = 0\n  exponent = 0;\n  for(i in 1:nrow(board)){\n    for(j in 1:ncol(board)){\n      id = (id + board[i,j]*(3^exponent))\n      exponent = exponent + 1\n    }\n  }\n  return(id)\n}\n\nidToBoard <- function(id, dim){\n  board = matrix(0,dim,dim)\n  \n  for(i in 1:nrow(board)){\n    for(j in 1:ncol(board)){\n      board[i,j] = (id %% 3 )\n      id = floor(id/3)\n    }\n  }\n  return(board)\n}",
+    "created" : 1433275072001.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3085280386",
+    "id" : "A9E25A3",
+    "lastKnownWriteTime" : 1433281993,
+    "path" : "C:/Users/Mateusz/Desktop/repozytoria/Coevolutionary-Tic-Tac-Toe-learning-/src/CoevolutionaryTicTacToe/Converter.R",
+    "project_path" : "Converter.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
