@@ -5,12 +5,16 @@ getNextMove <- function(board){
   return(sample(which(board == 0, arr.ind = F),1))
 }
 
-checkResult <- function(board, x,y,character){
+isIndexValid <- function(board,x,y){
+  return(x > 0 && y > 0 && x <= nrow(board) && y <= ncol(board))
+}
+
+checkResult <- function(board, x,y,character, K){
   hStart <- y
   hEnd <- y
   #horizontal
   for(i in 1:K){
-    if(isIndexValid(x, y - i) && board[x,y-i] == character){
+    if(isIndexValid(board,x, y - i) && board[x,y-i] == character){
       hStart <- (y-i)
     }
     else{
@@ -18,7 +22,7 @@ checkResult <- function(board, x,y,character){
     }
   }
   for(i in 1:K){
-    if(isIndexValid(x, y + i) && board[x,y+i] == character){
+    if(isIndexValid(board,x, y + i) && board[x,y+i] == character){
       hEnd <- (y+i)
     }
     else{
@@ -43,7 +47,7 @@ checkResult <- function(board, x,y,character){
   vEnd <- x
   #vertical
   for(i in 1:K){
-    if(isIndexValid(x-i, y) && board[x-i,y] == character){
+    if(isIndexValid(board,x-i, y) && board[x-i,y] == character){
       vStart <- (x-i)
     }
     else{
@@ -51,7 +55,7 @@ checkResult <- function(board, x,y,character){
     }
   }
   for(i in 1:K){
-    if(isIndexValid(x+i, y) && board[x+i,y] == character){
+    if(isIndexValid(board,x+i, y) && board[x+i,y] == character){
       vEnd <- (x+i)
     }
     else{
@@ -76,7 +80,7 @@ checkResult <- function(board, x,y,character){
   dEnd <- 0
   #diagonal
   for(i in 1:K){
-    if(isIndexValid(x-i, y-i) && board[x-i,y-i] == character){
+    if(isIndexValid(board,x-i, y-i) && board[x-i,y-i] == character){
       dStart <- i
     }
     else{
@@ -84,7 +88,7 @@ checkResult <- function(board, x,y,character){
     }
   }
   for(i in 1:K){
-    if(isIndexValid(x+i, y+i) && board[x+i,y+i] == character){
+    if(isIndexValid(board,x+i, y+i) && board[x+i,y+i] == character){
       dEnd <- i
     }
     else{
@@ -109,7 +113,7 @@ checkResult <- function(board, x,y,character){
   adEnd <- 0
   #anti-diagonal
   for(i in 1:K){
-    if(isIndexValid(x+i, y-i) && board[x+i,y-i] == character){
+    if(isIndexValid(board,x+i, y-i) && board[x+i,y-i] == character){
       adStart <- i
     }
     else{
@@ -117,7 +121,7 @@ checkResult <- function(board, x,y,character){
     }
   }
   for(i in 1:K){
-    if(isIndexValid(x-i, y+i) && board[x-i,y+i] == character){
+    if(isIndexValid(board,x-i, y+i) && board[x-i,y+i] == character){
       adEnd <- i
     }
     else{
@@ -142,7 +146,7 @@ checkResult <- function(board, x,y,character){
 }
 
 
-battle <- function(N,k,battles){
+battle <- function(N,K,battles){
   p1 = 1
   p2 = 2
   scores=c(0,0)
@@ -159,7 +163,7 @@ battle <- function(N,k,battles){
       board[randomMove] = 1
       r = randomMove%%N
       c = floor(randomMove/N)
-      if(checkResult(board,r,c, 1) == TRUE){
+      if(checkResult(board,r,c, 1,K) == TRUE){
         print("wygrał p1")
         scores[p1] = scores[p1] + 1
         scores[p2] = scores[p2] - 2
@@ -172,7 +176,7 @@ battle <- function(N,k,battles){
       r = randomMove%%N
       c = floor(randomMove/N)
       
-      if(checkResult(board,r,c,2) == TRUE){
+      if(checkResult(board,r,c,2,K) == TRUE){
         print("wygral p2")
         scores[p1] = scores[p1] - 2
         scores[p2] = scores[p2] + 1
