@@ -4,7 +4,7 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
     return(NULL)
   }
   
-  m = 3
+  m = 1000
   
   population_1 = matrix(0, nrOfIndividuals, 3^(N*N))
   population_2 = matrix(0, nrOfIndividuals, 3^(N*N))
@@ -306,7 +306,7 @@ generateIndividual <- function(N){
   moves = matrix(0, 1, dim);
   
   for (i in 1:ncol(moves)){
-    board <- idToBoard(i, N)
+    board = idToBoard(i, N)
     moves[1, i] = getNextMove(board)
   }
   
