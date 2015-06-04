@@ -1,4 +1,11 @@
 startLearning <- function(N, K, nrOfIndividuals, learningTime){
+  if (nrOfIndividuals %% 4 != 0){
+    print("Liczba osobników w populacji musi być podzielna przez 4")
+    return(NULL)
+  }
+  
+  m = 3
+  
   population_1 = matrix(0, nrOfIndividuals, 3^(N*N))
   population_2 = matrix(0, nrOfIndividuals, 3^(N*N))
   
@@ -7,7 +14,7 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
     population_2[i,] = generateIndividual(N)
   }
   
-  for (i in 1:learningTime){
+  for (t in 1:learningTime){
     scores_1 = matrix(0, nrOfIndividuals, 1)
     scores_2 = matrix(0, nrOfIndividuals, 1)
     
@@ -18,12 +25,65 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
         scores_2[k2] = scores_2[k2] + scores[2]
       }
     }
+    
+    best_1_index = sort(scores_1, decreasing = TRUE, index.return = TRUE)[2]
+    best_2_index = sort(scores_2, decreasing = TRUE, index.return = TRUE)[2]
+    
+    best_1 = matrix(0, nrOfIndividuals, 3^(N*N))
+    best_2 = matrix(0, nrOfIndividuals, 3^(N*N))
+    
+    if (t == learningTime){
+      bestIndividuals = matrix(0, 2, 3^(N*N))
+      bestIndividuals[1,] = population_1[best_1_index[[1]][1],]
+      bestIndividuals[2,] = population_2[best_2_index[[1]][1],]
+      
+      return(bestIndividuals)
+    }
+    
+    for (i in 1:(floor(nrOfIndividuals / 4))){
+      best_1[i * 4 - 3,] = population_1[best_1_index[[1]][i * 2 - 1],]
+      best_1[i * 4 - 2,] = population_1[best_1_index[[1]][i * 2],]
+      children = crossover(population_1[best_1_index[[1]][i * 2 - 1],], population_1[best_1_index[[1]][i * 2],], m)
+      best_1[i * 4 - 1,] = children[1]
+      best_1[i * 4,] = children[2]
+      
+      best_2[i * 4 - 3,] = population_2[best_2_index[[1]][i * 2 - 1],]
+      best_2[i * 4 - 2,] = population_2[best_2_index[[1]][i * 2],]
+      children = crossover(population_2[best_2_index[[1]][i * 2 - 1],], population_2[best_2_index[[1]][i * 2],], m)
+      best_2[i * 4 - 1,] = children[1]
+      best_2[i * 4,] = children[2]
+    }
   }
   
-  return(individual)
+  return(NULL)
 }
 
-checkResult <- function(board, x, y, character, K){
+# Algorytm krzyzowania
+crossover <- function(a,b,m){
+  if(length(a) != length(b) || m < 1){
+    return(FALSE)
+  }
+  divisions = c(1,sort(sample(2:(length(a)-1),m,replace=F)), length(a))
+  children = matrix(0, 2, length(a));
+  
+  for(i in 1:(length(divisions)-1)){
+    if(i%%2 == 0){
+      children[1,divisions[i]:divisions[i+1]] = a[divisions[i]:divisions[i+1]]
+      children[2,divisions[i]:divisions[i+1]] = b[divisions[i]:divisions[i+1]]
+    }
+    else{
+      children[1,divisions[i]:divisions[i+1]] = b[divisions[i]:divisions[i+1]]
+      children[2,divisions[i]:divisions[i+1]] = a[divisions[i]:divisions[i+1]]
+    }
+  }
+  return(children)
+}
+
+isIndexValid <- function(board,x,y){
+  return(x > 0 && y > 0 && x <= nrow(board) && y <= ncol(board))
+}
+
+checkResult <- function(board, x,y,character, K){
   hStart <- y
   hEnd <- y
   #horizontal
@@ -119,8 +179,21 @@ checkResult <- function(board, x, y, character, K){
   return(FALSE)
 }
 
+getIndecies <- function(fieldId, N){
+  row=0
+  col=0
+  row = fieldId %% N 
+  if(row==0){
+    row = N
+    col = fieldId/N
+  }
+  else{
+    col = ceiling(fieldId/N)
+  }
+  return(c(row,col))
+}
 
-battle <- function(N,K,p1_Strategy, p2_Strategy){
+battle <- function(N, K, p1_Strategy, p2_Strategy){
   p1 = 1
   p2 = 2
   scores=c(0,0)
@@ -131,59 +204,66 @@ battle <- function(N,K,p1_Strategy, p2_Strategy){
     while(moveCounter > 0){
       
       #p1:
-      randomMove = p1_Strategy[boardToId(board)] #getNextMove(board)
-      board[randomMove] = 1
-      r = randomMove%%N
-      c = floor(randomMove/N)
-      if(checkResult(board,r,c, 1,K) == TRUE){
-        #print("wygrał p1")
+      randomMove = p1_Strategy[boardToId(board)]#getNextMove(board)
+      board[randomMove] = p1
+      ind = getIndecies(randomMove,N)
+      
+      if(checkResult(board,ind[1],ind[2], p1,K) == TRUE){
         scores[p1] = scores[p1] + 1
         scores[p2] = scores[p2] - 2
         break
       }
       
-      #p2:
-      randomMove = p2_Strategy[boardToId(board)] #getNextMove(board)
-      board[randomMove] = 2
-      r = randomMove%%N
-      c = floor(randomMove/N)
+      moveCounter = moveCounter -1
+      if(moveCounter <= 0){
+        break
+      }
       
-      if(checkResult(board,r,c,2,K) == TRUE){
-        #print("wygral p2")
+      #p2:
+      randomMove = p2_Strategy[boardToId(board)]#getNextMove(board)
+      board[randomMove] = p2
+      ind = getIndecies(randomMove,N)
+      if(checkResult(board,ind[1],ind[2],p2,K) == TRUE){
         scores[p1] = scores[p1] - 2
         scores[p2] = scores[p2] + 1
         break
-      }    
-      moveCounter = moveCounter -2
+      }
+      
+      moveCounter = moveCounter -1
     }
+    
+    board = matrix(0,N,N)
+    moveCounter = N*N
     
     while(moveCounter > 0){
       
       #p2:
-      randomMove = p2_Strategy[boardToId(board)] #getNextMove(board)
-      board[randomMove] = 2
-      r = randomMove%%N
-      c = floor(randomMove/N)
-      
-      if(checkResult(board,r,c,2,K) == TRUE){
-        #print("wygral p2")
+      randomMove = p2_Strategy[boardToId(board)]#getNextMove(board)
+      board[randomMove] = p2
+      ind = getIndecies(randomMove,N)
+      if(checkResult(board,ind[1],ind[2],p2,K) == TRUE){
         scores[p1] = scores[p1] - 2
         scores[p2] = scores[p2] + 1
         break
-      }    
+      }
+      
+      moveCounter = moveCounter -1
+      if(moveCounter <= 0){
+        break
+      }
       
       #p1:
-      randomMove = p1_Strategy[boardToId(board)] #getNextMove(board)
-      board[randomMove] = 1
-      r = randomMove%%N
-      c = floor(randomMove/N)
-      if(checkResult(board,r,c, 1,K) == TRUE){
-        #print("wygrał p1")
+      randomMove = p1_Strategy[boardToId(board)]#getNextMove(board)
+      board[randomMove] = p1
+      ind = getIndecies(randomMove,N)
+      
+      if(checkResult(board,ind[1],ind[2], p1,K) == TRUE){
         scores[p1] = scores[p1] + 1
         scores[p2] = scores[p2] - 2
         break
       }
-      moveCounter = moveCounter -2
+      
+      moveCounter = moveCounter -1
     }
   
   return(scores)
@@ -198,11 +278,12 @@ boardToId <- function(board){
       exponent = exponent + 1
     }
   }
-  return(id)
+  return(id + 1)
 }
 
 idToBoard <- function(id, dim){
   board = matrix(0,dim,dim)
+  id = id - 1
   
   for(i in 1:nrow(board)){
     for(j in 1:ncol(board)){
@@ -213,7 +294,7 @@ idToBoard <- function(id, dim){
   return(board)
 }
 
-getNextMove <- function(){ #(board){
+getNextMove <- function(board){ #(board){
   possibleMoves = which(board == 0, arr.ind = F)
   if (length(possibleMoves) == 0)
     return(0)
@@ -226,7 +307,7 @@ generateIndividual <- function(N){
   
   for (i in 1:ncol(moves)){
     board <- idToBoard(i, N)
-    moves[1, i] = getNextMove()
+    moves[1, i] = getNextMove(board)
   }
   
   return(moves)
