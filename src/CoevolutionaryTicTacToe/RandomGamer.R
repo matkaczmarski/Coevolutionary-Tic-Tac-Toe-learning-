@@ -1,3 +1,4 @@
+#Random gamer
 
 blank <- 0
 #lockBinding("b", globalenv())
@@ -157,9 +158,15 @@ checkResult <- function(x,y,character){
   
   if(moveCounter == 0){
     cat("DRAW!\n")
+    return(TRUE)
   }
+  return(FALSE)
 }
 
+
+getNextMove <- function(){ #(board){
+  return(sample(which(board == 0, arr.ind = F),1))
+}
 
 move <- function(x,y,character){
   if(board[x,y] != blank){
@@ -168,9 +175,15 @@ move <- function(x,y,character){
   
   board[x,y] <<- character
   moveCounter <<- moveCounter - 1
-  checkResult(x,y,character)
-   
+  if(checkResult(x,y,character) == TRUE){
+    return(TRUE)
+  }
+  randomMove = getNextMove()
+  board[randomMove] <<- (character + 1)
+  r = randomMove%%N
+  c = floor(randomMove/N)
+  if(checkResult(r,c,character + 1) == TRUE){
+    return(TRUE)
+  }
   board
 }
-
-
