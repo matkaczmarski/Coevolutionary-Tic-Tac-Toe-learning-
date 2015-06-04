@@ -145,6 +145,20 @@ checkResult <- function(board, x,y,character, K){
   return(FALSE)
 }
 
+getIndecies <- function(fieldId, N){
+  row=0
+  col=0
+  row = fieldId %% N 
+  if(row==0){
+    row = N
+    col = fieldId/N
+  }
+  else{
+    col = ceiling(fieldId/N)
+  }
+  return(c(row,col))
+}
+
 
 battle <- function(N,K,battles){
   p1 = 1
@@ -160,31 +174,40 @@ battle <- function(N,K,battles){
       
       #p1:
       randomMove = getNextMove(board)
-      board[randomMove] = 1
-      r = randomMove%%N
-      c = floor(randomMove/N)
-      if(checkResult(board,r,c, 1,K) == TRUE){
+      board[randomMove] = p1
+      ind = getIndecies(randomMove,N)
+      
+      if(checkResult(board,ind[1],ind[2], p1,K) == TRUE){
         print("wygrał p1")
         scores[p1] = scores[p1] + 1
         scores[p2] = scores[p2] - 2
+        #print(board)
+        break
+      }
+      
+      moveCounter = moveCounter -1
+      if(moveCounter <= 0){
+        print("DRAW")
+        #print(board)
         break
       }
       
       #p2:
       randomMove = getNextMove(board)
-      board[randomMove] = 2
-      r = randomMove%%N
-      c = floor(randomMove/N)
-      
-      if(checkResult(board,r,c,2,K) == TRUE){
+      board[randomMove] = p2
+      ind = getIndecies(randomMove,N)
+      if(checkResult(board,ind[1],ind[2],p2,K) == TRUE){
         print("wygral p2")
         scores[p1] = scores[p1] - 2
         scores[p2] = scores[p2] + 1
+        #print(board)
         break
-      }    
-      moveCounter = moveCounter -2
-      if(moveCounter == 0){
+      }
+      
+      moveCounter = moveCounter -1
+      if(moveCounter <= 0){
         print("DRAW")
+        #print(board)
       }
     }
   }

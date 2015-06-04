@@ -181,7 +181,7 @@ move <- function(x,y,character){
   randomMove = getNextMove()
   board[randomMove] <<- (character + 1)
   r = randomMove%%N
-  c = floor(randomMove/N)
+  c = floor(randomMove/N) + 1
   if(checkResult(r,c,character + 1) == TRUE){
     return(TRUE)
   }
