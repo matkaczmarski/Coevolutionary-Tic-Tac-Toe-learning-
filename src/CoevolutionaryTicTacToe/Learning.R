@@ -1,11 +1,19 @@
+scoresA <<- matrix(0,0,0)
+scoresB <<- matrix(0,0,0)
+
+
 startLearning <- function(N, K, nrOfIndividuals, learningTime){
   if (nrOfIndividuals %% 4 != 0){
     print("Liczba osobników w populacji musi być podzielna przez 4")
     return(NULL)
   }
   
-  m = 1000
-  probability = 0.01
+  m = 2000
+  probability1 = 0.05
+  probability2 = 0.075
+  
+  scoresA <<- matrix(0,learningTime,3)
+  scoresB <<- matrix(0,learningTime,3)
   
   population_1 = matrix(0, nrOfIndividuals, 3^(N*N))
   population_2 = matrix(0, nrOfIndividuals, 3^(N*N))
@@ -15,7 +23,7 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
     population_2[i,] = generateIndividual(N)
   }
   
-  for (t in 1:learningTime){
+  for (t in 1:(learningTime+1)){
     scores_1 = matrix(0, nrOfIndividuals, 1)
     scores_2 = matrix(0, nrOfIndividuals, 1)
     
@@ -33,11 +41,11 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
     best_1 = matrix(0, nrOfIndividuals, 3^(N*N))
     best_2 = matrix(0, nrOfIndividuals, 3^(N*N))
     
-    if (t == learningTime){
+    if (t > learningTime){
       bestIndividuals = matrix(0, 2, 3^(N*N))
       bestIndividuals[1,] = population_1[best_1_index[[1]][1],]
       bestIndividuals[2,] = population_2[best_2_index[[1]][1],]
-      
+  
       return(bestIndividuals)
     }
     
@@ -56,12 +64,17 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
     }
     
     for (i in 1:nrOfIndividuals){
-      best_1[i,] = mutate(best_1[i,],probability, N)
-      best_2[i,] = mutate(best_2[i,],probability, N)
+      best_1[i,] = mutate(best_1[i,],probability1, probability2,  N)
+      best_2[i,] = mutate(best_2[i,],probability1, probability2,  N)
     }
     
     population_1 = best_1
     population_2 = best_2
+    
+    #spr poprawy
+    scoresA[t,] <<- testBattle(N,K,10,population_1[best_1_index[[1]][1],])
+    scoresB[t,] <<- testBattle(N,K,10,population_2[best_2_index[[1]][1],])
+    
   }
   
   return(NULL)
@@ -88,13 +101,15 @@ crossover <- function(a,b,m){
   return(children)
 }
 
-mutate <- function(individual, p, dim){
-  for (i in 1:length(individual)){
-    if (p >= runif(1)){
-      individual[i] = getNextMove(idToBoard(i, dim))
+#algorytm mutacji
+mutate <- function(individual, p1, p2, dim){
+  if (p1 >= runif(1)){
+    for (i in 1:length(individual)){
+      if (p2 >= runif(1)){
+        individual[i] = getNextMove(idToBoard(i, dim))
+      }
     }
   }
-  
   return(individual)
 }
 
@@ -284,6 +299,85 @@ battle <- function(N, K, p1_Strategy, p2_Strategy){
       
       moveCounter = moveCounter -1
     }
+  
+  return(scores)
+}
+
+testBattle <- function(N, K, battles, bestStrategy){
+  p1 = 1
+  p2 = 2
+  scores=c(0,0,0)
+  win = 1
+  draw = 2
+  loss = 3
+  
+  for(b in 1:battles){
+    
+    board = matrix(0,N,N)
+    moveCounter = N*N
+    if(b%%2 == 0){
+      while(moveCounter > 0){
+        randomMove = getNextMove(board)
+        board[randomMove] = p1
+        ind = getIndecies(randomMove,N)
+        if(checkResult(board,ind[1],ind[2], p1,K) == TRUE){
+          scores[loss] = scores[loss] + 1
+          break
+        }
+        
+        moveCounter = moveCounter -1
+        if(moveCounter <= 0){
+          scores[draw] = scores[draw] + 1
+          break
+        }
+        
+        randomMove = bestStrategy[boardToId(board)]
+        board[randomMove] = p2
+        ind = getIndecies(randomMove,N)
+        if(checkResult(board,ind[1],ind[2],p2,K) == TRUE){
+          scores[win] = scores[win] + 1
+          break
+        }
+        
+        moveCounter = moveCounter -1
+        if(moveCounter <= 0){
+          scores[draw] = scores[draw] + 1
+          break
+        }
+      }
+    }
+    else{
+      while(moveCounter > 0){
+        randomMove = bestStrategy[boardToId(board)]
+        board[randomMove] = p2
+        ind = getIndecies(randomMove,N)
+        if(checkResult(board,ind[1],ind[2],p2,K) == TRUE){
+          scores[win] = scores[win] + 1
+          break
+        }
+        
+        moveCounter = moveCounter -1
+        if(moveCounter <= 0){
+          scores[draw] = scores[draw] + 1
+          break
+        }
+        
+        randomMove = getNextMove(board)
+        board[randomMove] = p1
+        ind = getIndecies(randomMove,N)
+        if(checkResult(board,ind[1],ind[2], p1,K) == TRUE){
+          scores[loss] = scores[loss] + 1
+          break
+        }
+        
+        moveCounter = moveCounter -1
+        if(moveCounter <= 0){
+          scores[draw] = scores[draw] + 1
+          break
+        }
+      }
+    }  
+  }
   
   return(scores)
 }
