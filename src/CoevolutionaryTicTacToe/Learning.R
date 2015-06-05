@@ -5,6 +5,7 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
   }
   
   m = 1000
+  probability = 0.01
   
   population_1 = matrix(0, nrOfIndividuals, 3^(N*N))
   population_2 = matrix(0, nrOfIndividuals, 3^(N*N))
@@ -54,6 +55,11 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
       best_2[i * 4,] = children[2]
     }
     
+    for (i in 1:nrOfIndividuals){
+      best_1[i,] = mutate(best_1[i,],probability, N)
+      best_2[i,] = mutate(best_2[i,],probability, N)
+    }
+    
     population_1 = best_1
     population_2 = best_2
   }
@@ -80,6 +86,16 @@ crossover <- function(a,b,m){
     }
   }
   return(children)
+}
+
+mutate <- function(individual, p, dim){
+  for (i in 1:length(individual)){
+    if (p >= runif(1)){
+      individual[i] = getNextMove(idToBoard(i, dim))
+    }
+  }
+  
+  return(individual)
 }
 
 isIndexValid <- function(board,x,y){
