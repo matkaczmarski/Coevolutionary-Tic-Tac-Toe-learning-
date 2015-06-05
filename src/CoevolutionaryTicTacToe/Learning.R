@@ -53,6 +53,9 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
       best_2[i * 4 - 1,] = children[1]
       best_2[i * 4,] = children[2]
     }
+    
+    population_1 = best_1
+    population_2 = best_2
   }
   
   return(NULL)
