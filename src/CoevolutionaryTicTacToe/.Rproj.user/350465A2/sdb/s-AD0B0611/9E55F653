@@ -1,0 +1,17 @@
+{
+    "contents" : "#Rysowanie wykresów\n\ndrawAllDataPlot <- function(scores){\n  wins = scores[,1]\n  draws = scores[,2]\n  losses = scores[,3]\n  \n  g_range <- range(0, wins, draws,losses)\n\n  plot(wins, type=\"o\", col=\"green\", ylim=g_range,  axes=FALSE, ann=FALSE)\n  \n  axis(2, las=1, at=0:g_range[2])\n  \n  box()\n  \n  lines(draws, type=\"o\", pch=22, lty=2, col=\"blue\")\n  lines(losses, type=\"o\", pch=22, lty=2, col=\"red\")\n  \n  title(main=\"Results\", col.main=\"red\", font.main=4)\n  \n  title(xlab=\"Iterations\", col.lab=rgb(0,0.5,0))\n  title(ylab=\"Results count\", col.lab=rgb(0,0.5,0))\n  \n  legend(1, g_range[2], c(\"wins\",\"draws\",\"losses\"), cex=0.8, col=c(\"green\",\"blue\",\"red\"), pch=21:22, lty=1:2);\n}\n\ndrawOnlyWinsPlot <- function(scores){\n   \n  wins = scores[,1]\n  draws = scores[,2]\n  losses = scores[,3]\n  \n  plot(wins, type=\"o\", col=\"green\")\n  box()\n  title(main=\"Results for 10 games each iteration\", col.main=\"red\", font.main=4)\n  title(xlab=\"Iterations\", col.lab=rgb(0,0.5,0))\n  title(ylab=\"Results count\", col.lab=rgb(0,0.5,0))\n  \n  legend(1, 10, c(\"wins\"), cex=0.8, col=c(\"green\"), pch=21:22, lty=1:2);\n}",
+    "created" : 1433526233935.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2377746493",
+    "id" : "9E55F653",
+    "lastKnownWriteTime" : 1433527041,
+    "path" : "C:/Users/Mateusz/Desktop/repozytoria/Coevolutionary-Tic-Tac-Toe-learning-/src/CoevolutionaryTicTacToe/PlotPainter.R",
+    "project_path" : "PlotPainter.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
