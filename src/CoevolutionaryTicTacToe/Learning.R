@@ -1,6 +1,6 @@
 scoresA <<- matrix(0,0,0)
 scoresB <<- matrix(0,0,0)
-
+scoresAvsB <<- matrix(0,0,0)
 
 startLearning <- function(N, K, nrOfIndividuals, learningTime){
   if (nrOfIndividuals %% 4 != 0){
@@ -10,9 +10,14 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
   
   m = 2500
   probability1 = 0.05
+  scoresAvsB <<- matrix(0, learningTime, 3)
   probability2 = 0.075
   vectorSize = 3^(N*N)
   enemiesCount = 5
+  
+  win = 1
+  draw = 2
+  loss = 3
   
   scoresA <<- matrix(0,learningTime,3)
   scoresB <<- matrix(0,learningTime,3)
@@ -32,6 +37,7 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
   }
   
   for (t in 1:(learningTime+1)){
+    print(t)
     scores_1 = matrix(0, nrOfIndividuals, 1)
     scores_2 = matrix(0, nrOfIndividuals, 1)
     
@@ -42,8 +48,14 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
     for (k in 1:nrOfIndividuals){
       for (k2 in 1:nrOfIndividuals){
         scores = battle(N, K, population_1[k,], population_2[k2,])
-        scores_1[k] = scores_1[k] + scores[1]
-        scores_2[k2] = scores_2[k2] + scores[2]
+        scores_1[k] = scores_1[k] + scores[1, win] * 1 - scores[1,loss] * 2
+        scores_2[k2] = scores_2[k2] + scores[2, win] * 1 - scores[2, loss] * 2
+        
+        if (t <= learningTime){
+          scoresAvsB[t,win] <<- scoresAvsB[t,win] + scores[1, win]
+          scoresAvsB[t,draw] <<- scoresAvsB[t,draw] + scores[1, draw]
+          scoresAvsB[t,loss] <<- scoresAvsB[t,loss] + scores[1, loss]
+        }
       }
     }
     
@@ -89,12 +101,21 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
         scoresA[t,] <<- (scoresA[t,] + testBattleWithStrategies(N,K,2,population_1[best_1_index[[1]][1],],enemies[i,]))
         scoresB[t,] <<- (scoresB[t,] + testBattleWithStrategies(N,K,2,population_2[best_2_index[[1]][1],],enemies[i,]))
       }
-    #}
-    
-    
+    #} 
   }
   
   return(NULL)
+}
+
+generateRandomOpponents <- function(battles,N){
+  opponents = matrix(0, battles, 3^(N*N))
+  for (i in 1:3^(N*N)){
+    for (j in 1:battles){
+      board = idToBoard(i, N)
+      opponents[j, i] = getNextMove(board)
+    }
+  }
+  return(opponents)
 }
 
 # Algorytm krzyzowania
@@ -247,7 +268,12 @@ getIndecies <- function(fieldId, N){
 battle <- function(N, K, p1_Strategy, p2_Strategy){
   p1 = 1
   p2 = 2
-  scores=c(0,0)
+  
+  win = 1
+  draw = 2
+  loss = 3
+  
+  scores = matrix(0, 2, 3)
   
     board = matrix(0,N,N)
     moveCounter = N*N
@@ -260,13 +286,15 @@ battle <- function(N, K, p1_Strategy, p2_Strategy){
       ind = getIndecies(randomMove,N)
       
       if(checkResult(board,ind[1],ind[2], p1,K) == TRUE){
-        scores[p1] = scores[p1] + 1
-        scores[p2] = scores[p2] - 2
+        scores[p1, win] = scores[p1, win] + 1
+        scores[p2, loss] = scores[p2, loss] + 1
         break
       }
       
       moveCounter = moveCounter -1
       if(moveCounter <= 0){
+        scores[p1, draw] = scores[p1, draw] + 1
+        scores[p2, draw] = scores[p2, draw] + 1
         break
       }
       
@@ -275,12 +303,17 @@ battle <- function(N, K, p1_Strategy, p2_Strategy){
       board[randomMove] = p2
       ind = getIndecies(randomMove,N)
       if(checkResult(board,ind[1],ind[2],p2,K) == TRUE){
-        scores[p1] = scores[p1] - 2
-        scores[p2] = scores[p2] + 1
+        scores[p1, loss] = scores[p1, loss] + 1
+        scores[p2, win] = scores[p2, win] + 1
         break
       }
       
       moveCounter = moveCounter -1
+      if(moveCounter <= 0){
+        scores[p1, draw] = scores[p1, draw] + 1
+        scores[p2, draw] = scores[p2, draw] + 1
+        break
+      }
     }
     
     board = matrix(0,N,N)
@@ -293,13 +326,15 @@ battle <- function(N, K, p1_Strategy, p2_Strategy){
       board[randomMove] = p2
       ind = getIndecies(randomMove,N)
       if(checkResult(board,ind[1],ind[2],p2,K) == TRUE){
-        scores[p1] = scores[p1] - 2
-        scores[p2] = scores[p2] + 1
+        scores[p1, loss] = scores[p1, loss] + 1
+        scores[p2, win] = scores[p2, win] + 1
         break
       }
       
       moveCounter = moveCounter -1
       if(moveCounter <= 0){
+        scores[p1, draw] = scores[p1, draw] + 1
+        scores[p2, draw] = scores[p2, draw] + 1
         break
       }
       
@@ -309,18 +344,23 @@ battle <- function(N, K, p1_Strategy, p2_Strategy){
       ind = getIndecies(randomMove,N)
       
       if(checkResult(board,ind[1],ind[2], p1,K) == TRUE){
-        scores[p1] = scores[p1] + 1
-        scores[p2] = scores[p2] - 2
+        scores[p1, win] = scores[p1, win] + 1
+        scores[p2, loss] = scores[p2, loss] + 1
         break
       }
       
       moveCounter = moveCounter -1
+      if(moveCounter <= 0){
+        scores[p1, draw] = scores[p1, draw] + 1
+        scores[p2, draw] = scores[p2, draw] + 1
+        break
+      }
     }
   
   return(scores)
 }
 
-testBattle <- function(N, K, battles, bestStrategy){
+testBattle <- function(N, K, battles, bestStrategy,randomOpponents){
   p1 = 1
   p2 = 2
   scores=c(0,0,0)
@@ -334,7 +374,7 @@ testBattle <- function(N, K, battles, bestStrategy){
     moveCounter = N*N
     if(b%%2 == 0){
       while(moveCounter > 0){
-        randomMove = getNextMove(board)
+        randomMove = randomOpponents[b, boardToId(board)]
         board[randomMove] = p1
         ind = getIndecies(randomMove,N)
         if(checkResult(board,ind[1],ind[2], p1,K) == TRUE){
@@ -379,7 +419,7 @@ testBattle <- function(N, K, battles, bestStrategy){
           break
         }
         
-        randomMove = getNextMove(board)
+        randomMove = randomOpponents[b, boardToId(board)]
         board[randomMove] = p1
         ind = getIndecies(randomMove,N)
         if(checkResult(board,ind[1],ind[2], p1,K) == TRUE){
