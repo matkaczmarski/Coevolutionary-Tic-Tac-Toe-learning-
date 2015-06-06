@@ -1,5 +1,6 @@
 scoresA <<- matrix(0,0,0)
 scoresB <<- matrix(0,0,0)
+scoresAvsB <<- matrix(0,0,0)
 randomOpponents <<- matrix(0,0,0)
 
 startLearning <- function(N, K, nrOfIndividuals, learningTime){
@@ -8,9 +9,15 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
     return(NULL)
   }
   
-  m = 3#2000
-  probability1 = 0.05
+  scoresAvsB <<- matrix(0, learningTime, 3)
+  
+  m = 2000
+  probability1 = 0.25
   probability2 = 0.075
+  
+  win = 1
+  draw = 2
+  loss = 3
   
   battles = 10
   randomOpponents <<- generateRandomOpponents(battles, N)
@@ -27,14 +34,21 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
   }
   
   for (t in 1:(learningTime+1)){
+    print(t)
     scores_1 = matrix(0, nrOfIndividuals, 1)
     scores_2 = matrix(0, nrOfIndividuals, 1)
     
     for (k in 1:nrOfIndividuals){
       for (k2 in 1:nrOfIndividuals){
         scores = battle(N, K, population_1[k,], population_2[k2,])
-        scores_1[k] = scores_1[k] + scores[1]
-        scores_2[k2] = scores_2[k2] + scores[2]
+        scores_1[k] = scores_1[k] + scores[1, win] * 1 - scores[1,loss] * 2
+        scores_2[k2] = scores_2[k2] + scores[2, win] * 1 - scores[2, loss] * 2
+        
+        if (t <= learningTime){
+          scoresAvsB[t,win] <<- scoresAvsB[t,win] + scores[1, win]
+          scoresAvsB[t,draw] <<- scoresAvsB[t,draw] + scores[1, draw]
+          scoresAvsB[t,loss] <<- scoresAvsB[t,loss] + scores[1, loss]
+        }
       }
     }
     
@@ -244,7 +258,12 @@ getIndecies <- function(fieldId, N){
 battle <- function(N, K, p1_Strategy, p2_Strategy){
   p1 = 1
   p2 = 2
-  scores=c(0,0)
+  
+  win = 1
+  draw = 2
+  loss = 3
+  
+  scores = matrix(0, 2, 3)
   
     board = matrix(0,N,N)
     moveCounter = N*N
@@ -257,13 +276,15 @@ battle <- function(N, K, p1_Strategy, p2_Strategy){
       ind = getIndecies(randomMove,N)
       
       if(checkResult(board,ind[1],ind[2], p1,K) == TRUE){
-        scores[p1] = scores[p1] + 1
-        scores[p2] = scores[p2] - 2
+        scores[p1, win] = scores[p1, win] + 1
+        scores[p2, loss] = scores[p2, loss] + 1
         break
       }
       
       moveCounter = moveCounter -1
       if(moveCounter <= 0){
+        scores[p1, draw] = scores[p1, draw] + 1
+        scores[p2, draw] = scores[p2, draw] + 1
         break
       }
       
@@ -272,12 +293,17 @@ battle <- function(N, K, p1_Strategy, p2_Strategy){
       board[randomMove] = p2
       ind = getIndecies(randomMove,N)
       if(checkResult(board,ind[1],ind[2],p2,K) == TRUE){
-        scores[p1] = scores[p1] - 2
-        scores[p2] = scores[p2] + 1
+        scores[p1, loss] = scores[p1, loss] + 1
+        scores[p2, win] = scores[p2, win] + 1
         break
       }
       
       moveCounter = moveCounter -1
+      if(moveCounter <= 0){
+        scores[p1, draw] = scores[p1, draw] + 1
+        scores[p2, draw] = scores[p2, draw] + 1
+        break
+      }
     }
     
     board = matrix(0,N,N)
@@ -290,13 +316,15 @@ battle <- function(N, K, p1_Strategy, p2_Strategy){
       board[randomMove] = p2
       ind = getIndecies(randomMove,N)
       if(checkResult(board,ind[1],ind[2],p2,K) == TRUE){
-        scores[p1] = scores[p1] - 2
-        scores[p2] = scores[p2] + 1
+        scores[p1, loss] = scores[p1, loss] + 1
+        scores[p2, win] = scores[p2, win] + 1
         break
       }
       
       moveCounter = moveCounter -1
       if(moveCounter <= 0){
+        scores[p1, draw] = scores[p1, draw] + 1
+        scores[p2, draw] = scores[p2, draw] + 1
         break
       }
       
@@ -306,12 +334,17 @@ battle <- function(N, K, p1_Strategy, p2_Strategy){
       ind = getIndecies(randomMove,N)
       
       if(checkResult(board,ind[1],ind[2], p1,K) == TRUE){
-        scores[p1] = scores[p1] + 1
-        scores[p2] = scores[p2] - 2
+        scores[p1, win] = scores[p1, win] + 1
+        scores[p2, loss] = scores[p2, loss] + 1
         break
       }
       
       moveCounter = moveCounter -1
+      if(moveCounter <= 0){
+        scores[p1, draw] = scores[p1, draw] + 1
+        scores[p2, draw] = scores[p2, draw] + 1
+        break
+      }
     }
   
   return(scores)
