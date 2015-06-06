@@ -1,6 +1,6 @@
 scoresA <<- matrix(0,0,0)
 scoresB <<- matrix(0,0,0)
-
+randomOpponents <<- matrix(0,0,0)
 
 startLearning <- function(N, K, nrOfIndividuals, learningTime){
   if (nrOfIndividuals %% 4 != 0){
@@ -8,9 +8,12 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
     return(NULL)
   }
   
-  m = 2000
+  m = 3#2000
   probability1 = 0.05
   probability2 = 0.075
+  
+  battles = 10
+  randomOpponents <<- generateRandomOpponents(battles, N)
   
   scoresA <<- matrix(0,learningTime,3)
   scoresB <<- matrix(0,learningTime,3)
@@ -72,12 +75,23 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
     population_2 = best_2
     
     #spr poprawy
-    scoresA[t,] <<- testBattle(N,K,10,population_1[best_1_index[[1]][1],])
-    scoresB[t,] <<- testBattle(N,K,10,population_2[best_2_index[[1]][1],])
+    scoresA[t,] <<- testBattle(N,K,battles,population_1[best_1_index[[1]][1],])
+    scoresB[t,] <<- testBattle(N,K,battles,population_2[best_2_index[[1]][1],])
     
   }
   
   return(NULL)
+}
+
+generateRandomOpponents <- function(battles,N){
+  opponents = matrix(0, battles, 3^(N*N))
+  for (i in 1:3^(N*N)){
+    for (j in 1:battles){
+      board = idToBoard(i, N)
+      opponents[j, i] = getNextMove(board)
+    }
+  }
+  return(opponents)
 }
 
 # Algorytm krzyzowania
@@ -317,7 +331,7 @@ testBattle <- function(N, K, battles, bestStrategy){
     moveCounter = N*N
     if(b%%2 == 0){
       while(moveCounter > 0){
-        randomMove = getNextMove(board)
+        randomMove = randomOpponents[b, boardToId(board)]
         board[randomMove] = p1
         ind = getIndecies(randomMove,N)
         if(checkResult(board,ind[1],ind[2], p1,K) == TRUE){
@@ -362,7 +376,7 @@ testBattle <- function(N, K, battles, bestStrategy){
           break
         }
         
-        randomMove = getNextMove(board)
+        randomMove = randomOpponents[b, boardToId(board)]
         board[randomMove] = p1
         ind = getIndecies(randomMove,N)
         if(checkResult(board,ind[1],ind[2], p1,K) == TRUE){
