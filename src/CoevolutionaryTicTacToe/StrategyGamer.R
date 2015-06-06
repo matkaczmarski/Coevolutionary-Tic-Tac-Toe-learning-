@@ -7,18 +7,11 @@ o <- 1
 x <- 2
 #lockBinding("x", globalenv())
 
-
-n <- readline(prompt="Enter board size: ")
-N <- as.integer(n)
-N
-
-k <- readline(prompt="Enter winning line size: ")
-K <- as.integer(k)
-K
+N <- 0
+K <- 0
 
 board <- matrix(0, N, N)
 moveCounter <- N*N
-
 
 getNextMove <- function(board){
   return(sample(which(board == 0, arr.ind = F),1))
@@ -179,19 +172,53 @@ getIndecies <- function(fieldId, N){
 }
 
 strategy = 0
-saveStrategy <- function(str){
-  strategy<<-str
+playerSymbol <- 1
+computerSymbol <- 2
+
+startGame <- function(str){
+  strategy <<- str
+  
+  n <<- readline(prompt="Enter board size: ")
+  N <<- as.integer(n)
+  if(length(str) != 3^(N*N)){
+    print("Error. Given strategy is compatible with this board size")
+    return(FALSE)
+  }
+  
+  k <<- readline(prompt="Enter winning line size: ")
+  K <<- as.integer(k)
+  
+  board <<- matrix(0, N, N)
+  moveCounter <<- N*N
+  
+  whoFirst <- readline(prompt="Choose your symbol '1' or '2' (player with '1' always plays first): ")
+  if(whoFirst == '2'){
+    print("COMPUTER starts. Your symbol is '2'.")
+    playerSymbol <<- 2
+    computerSymbol <<- 1
+    randomMove = strategy[boardToId(board)]
+    board[randomMove] <<- computerSymbol
+    print(board)
+  }
+  else{
+    print("You start. Your symbol is '1'.")
+    playerSymbol <<- 1
+    computerSymbol <<- 2
+    print(board)
+  }
+  
 }
 
-move <- function(character,x,y){
+move <- function(x,y){
   if(board[x,y] != blank){
     return (FALSE)
   }
   
-  board[x,y] <<- character
+  board[x,y] <<- playerSymbol
   moveCounter <<- moveCounter - 1
-  if(checkResult(board,x,y,character,K) == TRUE){
-    print("WYGRAŁEŚ")
+  if(checkResult(board,x,y,playerSymbol,K) == TRUE){
+    print("You won!")
+    print(board)
     return(TRUE)
   }
   
@@ -201,17 +228,19 @@ move <- function(character,x,y){
   }
   
   randomMove = strategy[boardToId(board)]
-  board[randomMove] <<- character + 1
+  board[randomMove] <<- computerSymbol
   ind = getIndecies(randomMove,N)
   
-  if(checkResult(board,ind[1],ind[2], character + 1,K) == TRUE){
-    print("PRZEGRAŁEŚ")
+  if(checkResult(board,ind[1],ind[2], computerSymbol,K) == TRUE){
+    print("You lost!")
+    print(board)
     return(TRUE)
   }
   
   moveCounter <<- moveCounter -1
   if(moveCounter <= 0){
-    print("REMIS")
+    print("Draw!")
+    print(board)
     return(TRUE)
   }
   print(board)

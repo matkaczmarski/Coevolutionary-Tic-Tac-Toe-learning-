@@ -8,15 +8,23 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
     return(NULL)
   }
   
-  m = 2000
+  m = 2500
   probability1 = 0.05
   probability2 = 0.075
+  vectorSize = 3^(N*N)
+  enemiesCount = 5
   
   scoresA <<- matrix(0,learningTime,3)
   scoresB <<- matrix(0,learningTime,3)
   
-  population_1 = matrix(0, nrOfIndividuals, 3^(N*N))
-  population_2 = matrix(0, nrOfIndividuals, 3^(N*N))
+  #generowanie przeciwników testowych
+  enemies = matrix(0,enemiesCount, vectorSize)
+  for (i in 1:enemiesCount){
+    enemies[i,] = generateIndividual(N)
+  }
+  
+  population_1 = matrix(0, nrOfIndividuals, vectorSize)
+  population_2 = matrix(0, nrOfIndividuals, vectorSize)
   
   for (i in 1:nrOfIndividuals){
     population_1[i,] = generateIndividual(N)
@@ -26,6 +34,10 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
   for (t in 1:(learningTime+1)){
     scores_1 = matrix(0, nrOfIndividuals, 1)
     scores_2 = matrix(0, nrOfIndividuals, 1)
+    
+    if(t %% 50 == 0){
+      print(paste0("Iteracja: ", t))
+    }
     
     for (k in 1:nrOfIndividuals){
       for (k2 in 1:nrOfIndividuals){
@@ -38,11 +50,11 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
     best_1_index = sort(scores_1, decreasing = TRUE, index.return = TRUE)[2]
     best_2_index = sort(scores_2, decreasing = TRUE, index.return = TRUE)[2]
     
-    best_1 = matrix(0, nrOfIndividuals, 3^(N*N))
-    best_2 = matrix(0, nrOfIndividuals, 3^(N*N))
+    best_1 = matrix(0, nrOfIndividuals, vectorSize)
+    best_2 = matrix(0, nrOfIndividuals, vectorSize)
     
     if (t > learningTime){
-      bestIndividuals = matrix(0, 2, 3^(N*N))
+      bestIndividuals = matrix(0, 2, vectorSize)
       bestIndividuals[1,] = population_1[best_1_index[[1]][1],]
       bestIndividuals[2,] = population_2[best_2_index[[1]][1],]
   
@@ -72,8 +84,13 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
     population_2 = best_2
     
     #spr poprawy
-    scoresA[t,] <<- testBattle(N,K,10,population_1[best_1_index[[1]][1],])
-    scoresB[t,] <<- testBattle(N,K,10,population_2[best_2_index[[1]][1],])
+    #if(t%%5 == 0){
+      for(i in 1:enemiesCount){
+        scoresA[t,] <<- (scoresA[t,] + testBattleWithStrategies(N,K,2,population_1[best_1_index[[1]][1],],enemies[i,]))
+        scoresB[t,] <<- (scoresB[t,] + testBattleWithStrategies(N,K,2,population_2[best_2_index[[1]][1],],enemies[i,]))
+      }
+    #}
+    
     
   }
   
@@ -363,6 +380,86 @@ testBattle <- function(N, K, battles, bestStrategy){
         }
         
         randomMove = getNextMove(board)
+        board[randomMove] = p1
+        ind = getIndecies(randomMove,N)
+        if(checkResult(board,ind[1],ind[2], p1,K) == TRUE){
+          scores[loss] = scores[loss] + 1
+          break
+        }
+        
+        moveCounter = moveCounter -1
+        if(moveCounter <= 0){
+          scores[draw] = scores[draw] + 1
+          break
+        }
+      }
+    }  
+  }
+  
+  return(scores)
+}
+
+testBattleWithStrategies <- function(N, K, battles, bestStrategy, enemyStrategy){
+  p1 = 1
+  p2 = 2
+  scores=c(0,0,0)
+  win = 1
+  draw = 2
+  loss = 3
+  
+  for(b in 1:battles){
+    
+    board = matrix(0,N,N)
+    moveCounter = N*N
+    if(b%%2 == 0){
+      while(moveCounter > 0){
+        
+        randomMove = enemyStrategy[boardToId(board)]
+        board[randomMove] = p1
+        ind = getIndecies(randomMove,N)
+        if(checkResult(board,ind[1],ind[2], p1,K) == TRUE){
+          scores[loss] = scores[loss] + 1
+          break
+        }
+        
+        moveCounter = moveCounter -1
+        if(moveCounter <= 0){
+          scores[draw] = scores[draw] + 1
+          break
+        }
+        
+        randomMove = bestStrategy[boardToId(board)]
+        board[randomMove] = p2
+        ind = getIndecies(randomMove,N)
+        if(checkResult(board,ind[1],ind[2],p2,K) == TRUE){
+          scores[win] = scores[win] + 1
+          break
+        }
+        
+        moveCounter = moveCounter -1
+        if(moveCounter <= 0){
+          scores[draw] = scores[draw] + 1
+          break
+        }
+      }
+    }
+    else{
+      while(moveCounter > 0){
+        randomMove = bestStrategy[boardToId(board)]
+        board[randomMove] = p2
+        ind = getIndecies(randomMove,N)
+        if(checkResult(board,ind[1],ind[2],p2,K) == TRUE){
+          scores[win] = scores[win] + 1
+          break
+        }
+        
+        moveCounter = moveCounter -1
+        if(moveCounter <= 0){
+          scores[draw] = scores[draw] + 1
+          break
+        }
+        
+        randomMove = enemyStrategy[boardToId(board)]
         board[randomMove] = p1
         ind = getIndecies(randomMove,N)
         if(checkResult(board,ind[1],ind[2], p1,K) == TRUE){

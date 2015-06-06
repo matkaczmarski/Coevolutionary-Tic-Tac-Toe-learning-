@@ -29,6 +29,7 @@ drawOnlyWinsPlot <- function(scores){
   wins = scores[,1]
   draws = scores[,2]
   losses = scores[,3]
+  g_range <- range(0, wins, draws,losses)
   
   plot(wins, type="o", col="green")
   box()
@@ -36,5 +37,5 @@ drawOnlyWinsPlot <- function(scores){
   title(xlab="Iterations", col.lab=rgb(0,0.5,0))
   title(ylab="Results count", col.lab=rgb(0,0.5,0))
   
-  legend(1, 10, c("wins"), cex=0.8, col=c("green"), pch=21:22, lty=1:2);
+  legend(1, g_range[2], c("wins"), cex=0.8, col=c("green"), pch=21:22, lty=1:2);
 }
