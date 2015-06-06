@@ -2,6 +2,9 @@ scoresA <<- matrix(0,0,0)
 scoresB <<- matrix(0,0,0)
 scoresAvsB <<- matrix(0,0,0)
 
+pupulation_1 <<- matrix(0,0,0)
+population_2 <<- matrix(0,0,0)
+
 startLearning <- function(N, K, nrOfIndividuals, learningTime){
   if (nrOfIndividuals %% 4 != 0){
     print("Liczba osobników w populacji musi być podzielna przez 4")
@@ -28,12 +31,12 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
     enemies[i,] = generateIndividual(N)
   }
   
-  population_1 = matrix(0, nrOfIndividuals, vectorSize)
-  population_2 = matrix(0, nrOfIndividuals, vectorSize)
+  population_1 <<- matrix(0, nrOfIndividuals, vectorSize)
+  population_2 <<- matrix(0, nrOfIndividuals, vectorSize)
   
   for (i in 1:nrOfIndividuals){
-    population_1[i,] = generateIndividual(N)
-    population_2[i,] = generateIndividual(N)
+    population_1[i,] <<- generateIndividual(N)
+    population_2[i,] <<- generateIndividual(N)
   }
   
   for (t in 1:(learningTime+1)){
@@ -92,8 +95,8 @@ startLearning <- function(N, K, nrOfIndividuals, learningTime){
       best_2[i,] = mutate(best_2[i,],probability1, probability2,  N)
     }
     
-    population_1 = best_1
-    population_2 = best_2
+    population_1 <<- best_1
+    population_2 <<- best_2
     
     #spr poprawy
     #if(t%%5 == 0){
@@ -286,6 +289,9 @@ battle <- function(N, K, p1_Strategy, p2_Strategy){
       ind = getIndecies(randomMove,N)
       
       if(checkResult(board,ind[1],ind[2], p1,K) == TRUE){
+        for (i in 1:length(population_1[,1])){
+          population_1[i,boardToId(board)] <<- randomMove
+        }
         scores[p1, win] = scores[p1, win] + 1
         scores[p2, loss] = scores[p2, loss] + 1
         break
@@ -303,6 +309,9 @@ battle <- function(N, K, p1_Strategy, p2_Strategy){
       board[randomMove] = p2
       ind = getIndecies(randomMove,N)
       if(checkResult(board,ind[1],ind[2],p2,K) == TRUE){
+        for (i in 1:length(population_2[,1])){
+          population_2[i,boardToId(board)] <<- randomMove
+        }
         scores[p1, loss] = scores[p1, loss] + 1
         scores[p2, win] = scores[p2, win] + 1
         break
@@ -326,6 +335,9 @@ battle <- function(N, K, p1_Strategy, p2_Strategy){
       board[randomMove] = p2
       ind = getIndecies(randomMove,N)
       if(checkResult(board,ind[1],ind[2],p2,K) == TRUE){
+        for (i in 1:length(population_2[,1])){
+          population_2[i,boardToId(board)] <<- randomMove
+        }
         scores[p1, loss] = scores[p1, loss] + 1
         scores[p2, win] = scores[p2, win] + 1
         break
@@ -344,6 +356,9 @@ battle <- function(N, K, p1_Strategy, p2_Strategy){
       ind = getIndecies(randomMove,N)
       
       if(checkResult(board,ind[1],ind[2], p1,K) == TRUE){
+        for (i in 1:length(population_1[,1])){
+          population_1[i,boardToId(board)] <<- randomMove
+        }
         scores[p1, win] = scores[p1, win] + 1
         scores[p2, loss] = scores[p2, loss] + 1
         break
