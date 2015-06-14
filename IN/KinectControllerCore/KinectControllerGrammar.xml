@@ -1,0 +1,16 @@
+<grammar version="1.0" xml:lang="en-US" mode="voice" root="topRule"
+ xmlns="http://www.w3.org/2001/06/grammar" tag-format="semantics/1.0">
+
+  <rule id="topRule" scope="public">
+    <one-of>
+      <item> forward </item>
+      <item> go </item>
+      <item> back </item>
+      <item> left </item>
+      <item> right </item>
+      <item> close </item>
+      <item> open </item>
+    </one-of>
+  </rule>
+
+</grammar>
